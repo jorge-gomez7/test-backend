@@ -2,6 +2,8 @@
 const { response } = require('express');
 // librería axios para poder llamar los endpoint en el controller
 const axios = require('axios');
+//verificar base64
+const base64Regex = require('base64-regex');
 
 
 
@@ -12,6 +14,8 @@ const axios = require('axios');
 
 const sendGetRequest = async (req, res = response) => {
     try {
+
+        newResponse = [];
         const resp = await axios.get(process.env.ENDPOINT, {
             headers: {
                 'user': process.env.USER,
@@ -19,12 +23,24 @@ const sendGetRequest = async (req, res = response) => {
             }
         });
         const info = await resp.data;
-        console.log(info);
+
+        info.map(data => {
+            try {
+                if (base64Regex({ exact: true }).test(data.base64)) {
+                    newResponse.push(data);
+                }
+            } catch (error) {
+
+            }
+        });
+
+        console.log(newResponse);
         res.json({
             ok: true,
             msg: 'Data obtenida',
-            info
-        })
+            newResponse
+
+        });
 
     } catch (err) {
         // Handle Error Here
